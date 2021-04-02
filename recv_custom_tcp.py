@@ -31,19 +31,21 @@ except ValueError:
     print('Error: invalid remote port')
 
 iface = 'lo'
-ip_handler = ipv4.IPv4Handler('127.0.0.1')
+ip_handler = ipv4.IPv4Handler('127.0.0.1', 1)
 
 try:
     # hide local port
-    tools.hide_from_kernel(iface, '127.0.0.1', dst_port)
+    tools.hide_from_kernel(iface, '127.0.0.1', dst_port, proto='icmp')
     while True:
-        ip_handler.receive()
-        tools.print_pkg_data_hex(ip_handler.nextpk_in.get_bytes())
+        if ip_handler.receive():
+            tools.print_pkg_data_hex(ip_handler.nextpk_in.get_bytes())
+            ip_handler.nextpk_in.info()
+            break
 
 except KeyboardInterrupt:
     tools.print_rgb('\n--- Cancelled ---', (200, 0, 0), True)
 finally:
     print('\nCleaning up...')
-    tools.unhide_from_kernel(iface, '127.0.0.1', dst_port)
+    tools.unhide_from_kernel(iface, '127.0.0.1', dst_port, proto='icmp')
     del ip_handler
     print('Bye!')
