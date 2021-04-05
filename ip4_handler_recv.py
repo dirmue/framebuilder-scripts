@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from framebuilder import ipv4, tools
+from framebuilder import ipv4, tcp, tools
 
 ip_handler = ipv4.IPv4Handler('127.0.0.1')
 
@@ -10,6 +10,9 @@ try:
         if pk is not None:
             tools.print_pkg_data_hex(pk.get_bytes())
             pk.info()
+            if pk.protocol == 6:
+                seg = tcp.TCPSegment.from_packet(pk)
+                seg.info()
             break
 except KeyboardInterrupt:
     tools.print_rgb('\n--- Cancelled ---', (200, 0, 0), True)
