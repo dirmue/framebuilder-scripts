@@ -9,8 +9,8 @@ frame.dst_addr = '54:25:ea:a5:00:f9'
 frame.ether_type = 0x0800
 
 packet = ip4.IPv4Packet()
-packet.src_addr = '192.168.2.106'
-packet.dst_addr = '78.47.151.229'
+packet.src_addr = '10.0.0.1'
+packet.dst_addr = '10.0.0.2'
 packet.protocol = 1
 packet.flags = 2
 
