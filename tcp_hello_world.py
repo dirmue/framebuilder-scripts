@@ -83,7 +83,7 @@ packet.ttl = 64
 packet.identification = pid
 
 # initial sequence number
-isn = time.time_ns() >> 32
+isn = tools.get_rfc793_isn()
 
 segment = tcp.TCPSegment()
 segment.src_port = src_port
