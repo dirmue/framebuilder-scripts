@@ -8,8 +8,8 @@ import cpkudp as udp
 socket = tools.create_socket('wlp3s0')
 
 packet = ip4.IPv4Packet()
-packet.src_addr = '192.168.2.106'
-packet.dst_addr = '78.47.151.229'
+packet.src_addr = '10.0.0.1'
+packet.dst_addr = '10.0.0.2'
 packet.ttl = 64
 packet.protocol = 17
 packet.flags = 2
