@@ -7,8 +7,8 @@ import cpkipv4 as ip4
 socket = tools.create_socket('wlp3s0')
 
 packet = ip4.IPv4Packet()
-packet.src_addr = '192.168.2.106'
-packet.dst_addr = '78.47.151.229'
+packet.src_addr = '10.0.0.1'
+packet.dst_addr = '10.0.0.2'
 packet.ttl = 1
 packet.protocol = 253
 packet.flags = 2
