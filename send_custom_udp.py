@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
-import cpktools as tools
-import cpkether as eth
-import cpkipv4 as ip4
-import cpkudp as udp
+from framebuilder import tools, eth, ipv4, udp
 
 socket = tools.create_socket('wlp3s0')
 
-packet = ip4.IPv4Packet()
+packet = ipv4.IPv4Packet()
 packet.src_addr = '10.0.0.1'
 packet.dst_addr = '10.0.0.2'
 packet.ttl = 64

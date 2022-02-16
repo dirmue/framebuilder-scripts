@@ -86,7 +86,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     #
-    # In order not to see any oversized frames, turn off any offloading
+    # In order not to see any oversized frames, turn off all offloading
     #
     os.system('ethtool -K {} tx off rx off gro off gso off &>/dev/null'.format(sys.argv[1]))
 

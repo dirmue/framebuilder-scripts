@@ -2,7 +2,7 @@
 
 from framebuilder import tools, eth, ipv4 as ip4, icmpv4 as icmp
 
-socket = tools.create_socket('wlo1')
+socket = tools.create_socket('wlp3s0')
 frame = eth.Frame()
 frame.src_addr = 'dc:41:a9:36:cf:f4'
 frame.dst_addr = '54:25:ea:a5:00:f9'
