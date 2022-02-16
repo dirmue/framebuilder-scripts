@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Script for ARP spoofing"""
-import os
-import time
+import time, os
 from framebuilder import defs, eth, ipv4, tools
 
 INTERFACE = 'eth0'
