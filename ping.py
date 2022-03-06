@@ -20,19 +20,19 @@ dst_ip = sys.argv[1]
 if not tools.is_valid_ipv4_address(sys.argv[1]):
     try:
         dst_ip = socket.gethostbyname(sys.argv[1])
-    except:
+    except socket.gaierror as e:
+        print(e)
         sys.exit(1)
 
 if_name = tools.get_route_if_name(dst_ip)
 ip_handler = ipv4.IPv4Handler(if_name, dst_ip, proto=1, block=0)
 pid = os.getpid()
 
-## build ICMPv4 message
-# generate payload
+# generate payload and build ICMPv4 message
 pl_length = 56
 payload = b''
 for num in range(pl_length):
-    payload += tools.to_bytes(num & 0xff, 1)
+    payload += tools.to_bytes(num, 1)
 echo_req = icmpv4.ICMPEchoRequest()
 echo_req.identifier = pid
 echo_req.sequence_number = 1
@@ -43,12 +43,12 @@ pk_sent = 0
 pk_recv = 0
 t_init = time.time_ns()
 
-print(f'PING {sys.argv[1]} ({dst_ip}) {pl_length} bytes of data')
+print(f'PING {sys.argv[1]} ({dst_ip}): {pl_length} data bytes')
 try:
     while True:
         # initialize timers
         t_start = time.time_ns()
-        t_out = 1.0
+        t_out = 1.0 # time out 1s
         t_diff = 0.0
 
         r_echo_reply = None
@@ -63,7 +63,7 @@ try:
 
             if r_packet is None:
                 # Calculate passed time in seconds
-                # t_diff = (time.time_ns() - t_start) / 1e9
+                t_diff = (time.time_ns() - t_start) / 1e9
                 continue
             
             r_echo_reply = icmpv4.ICMPv4Message.from_ipv4_packet(r_packet)
