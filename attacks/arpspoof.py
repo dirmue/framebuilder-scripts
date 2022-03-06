@@ -114,6 +114,9 @@ try:
                         if tcp_seg.rst == 1:
                             tools.print_rgb(' RST', rgb=(200, 10, 10), 
                                     bold=True, end='')
+                        if tcp_seg.fin == 1:
+                            tools.print_rgb(' FIN', rgb=(200, 100, 100), 
+                                    bold=True, end='')
                         if tcp_seg.ack == 1:
                             tools.print_rgb(' ACK', rgb=(100, 100, 100), 
                                     bold=True, end='')
