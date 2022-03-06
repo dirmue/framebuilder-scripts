@@ -107,8 +107,18 @@ try:
                         l_str = f'{conn_tuple[0]}:{conn_tuple[1]}'
                         r_str = f'{conn_tuple[2]}:{conn_tuple[3]}'
                         tools.print_rgb(f'TCP SESSION: {l_str} <-> {r_str}',
-                                rgb=(100, 200, 100), bold=True)
-                        connections.append(conn_tuple)
+                                rgb=(100, 200, 100), bold=True, end='')
+                        if tcp_seg.syn == 1:
+                            tools.print_rgb(' SYN', rgb=(10, 200, 10), 
+                                    bold=True, end='')
+                        if tcp_seg.rst == 1:
+                            tools.print_rgb(' RST', rgb=(200, 10, 10), 
+                                    bold=True, end='')
+                        if tcp_seg.rst == 1:
+                            tools.print_rgb(' ACK', rgb=(100, 100, 100), 
+                                    bold=True, end='')
+                        print()
+                        connections.append(set(conn_tuple))
 except KeyboardInterrupt: 
     tools.print_rgb('Ctrl-C -- Handing connections over...',
             rgb=(200, 0, 0), bold=True, end='')
