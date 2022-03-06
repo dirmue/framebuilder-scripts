@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-import cpktools as tools
-import cpkether as eth
+from framebuilder import tools, eth
 
 frame_data = {
         'header': {

@@ -10,7 +10,8 @@ if not tools.is_valid_ipv4_address(sys.argv[1]):
     except:
         sys.exit(1)
 
-h = tcp.TCPHandler('wlp3s0', debug=False)
+if_name = tools.get_route_if_name(dst_ip)
+h = tcp.TCPHandler(if_name, debug=True)
 start = time.time()
 h.open(dst_ip, int(sys.argv[2]))
 
