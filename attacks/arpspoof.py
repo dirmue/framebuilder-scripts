@@ -48,7 +48,7 @@ connections = []
 
 tools.print_rgb('--- ARP spoofer ---',
         rgb=(200, 200, 200), bold=True)
-tools.print_rgb(f'pretend {lef_ip} and {right_ip} to be at {my_mac}',
+tools.print_rgb(f'pretend {left_ip} and {right_ip} to be at {my_mac}',
         rgb=(200, 0, 0), bold=True)
 
 arp_data_left = {'operation': 2,
