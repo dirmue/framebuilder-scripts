@@ -111,7 +111,7 @@ try:
                                          conn_tuple[0], 
                                          conn_tuple[1])
                         color = (100, 200, 100)
-                        if reverse_tuple in connections:
+                        if reverse_tupel in connections:
                             color = (100, 100, 100)
                         tools.print_rgb(f'TCP SESSION: {l_str} <-> {r_str}',
                                 rgb=color, bold=True, end='')
