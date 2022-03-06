@@ -26,7 +26,8 @@ if not tools.is_valid_ipv4_address(sys.argv[1]):
 
 if_name = tools.get_route_if_name(dst_ip)
 ip_handler = ipv4.IPv4Handler(if_name, dst_ip, proto=1, block=0)
-pid = os.getpid()
+pid = os.getpid() & 0xffff
+
 
 # generate payload and build ICMPv4 message
 pl_length = 56
