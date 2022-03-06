@@ -106,8 +106,15 @@ try:
                     if conn_tuple not in connections:
                         l_str = f'{conn_tuple[0]}:{conn_tuple[1]}'
                         r_str = f'{conn_tuple[2]}:{conn_tuple[3]}'
+                        reverse_tupel = (conn_tuple[2], 
+                                         conn_tuple[3], 
+                                         conn_tuple[0], 
+                                         conn_tuple[1])
+                        color = (100, 200, 100)
+                        if reverse_tuple in connections:
+                            color = (100, 100, 100)
                         tools.print_rgb(f'TCP SESSION: {l_str} <-> {r_str}',
-                                rgb=(100, 200, 100), bold=True, end='')
+                                rgb=color, bold=True, end='')
                         if tcp_seg.syn == 1:
                             tools.print_rgb(' SYN', rgb=(10, 200, 10), 
                                     bold=True, end='')
