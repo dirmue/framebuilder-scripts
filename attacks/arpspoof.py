@@ -118,7 +118,7 @@ try:
                             tools.print_rgb(' ACK', rgb=(100, 100, 100), 
                                     bold=True, end='')
                         print()
-                        connections.append(set(conn_tuple))
+                        connections.append(conn_tuple)
 except KeyboardInterrupt: 
     tools.print_rgb('Ctrl-C -- Handing connections over...',
             rgb=(200, 0, 0), bold=True, end='')
