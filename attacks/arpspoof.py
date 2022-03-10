@@ -12,22 +12,22 @@ if len(sys.argv) < 6:
 
 if not tools.is_valid_ipv4_address(sys.argv[2]):
     print(f'Invalid IP address: {sys.argv[2]}')
-    print(f'Usage: {sys.argv[0]} src_mac src_ip dst_ip dst_port')
+    print(f'Usage: {sys.argv[0]} interface left_ip left_mac right_ip right_mac')
     sys.exit(1)
 
 if not tools.is_valid_ipv4_address(sys.argv[4]):
     print(f'Invalid IP address: {sys.argv[4]}')
-    print(f'Usage: {sys.argv[0]} src_mac src_ip dst_ip dst_port')
+    print(f'Usage: {sys.argv[0]} interface left_ip left_mac right_ip right_mac')
     sys.exit(1)
 
 if not tools.is_valid_mac_address(sys.argv[3]):
     print(f'Invalid MAC address: {sys.argv[3]}')
-    print(f'Usage: {sys.argv[0]} src_mac src_ip dst_ip dst_port')
+    print(f'Usage: {sys.argv[0]} interface left_ip left_mac right_ip right_mac')
     sys.exit(1)
 
 if not tools.is_valid_mac_address(sys.argv[5]):
     print(f'Invalid MAC address: {sys.argv[5]}')
-    print(f'Usage: {sys.argv[0]} src_mac src_ip dst_ip dst_port')
+    print(f'Usage: {sys.argv[0]} interface left_ip left_mac right_ip right_mac')
     sys.exit(1)
 
 if_name = sys.argv[1]
@@ -44,7 +44,6 @@ left_ip = sys.argv[2]
 left_mac = sys.argv[3]
 right_ip = sys.argv[4]
 right_mac = sys.argv[5]
-connections = []
 
 tools.print_rgb('--- ARP spoofer ---',
         rgb=(200, 200, 200), bold=True)
@@ -101,34 +100,18 @@ try:
                 # capture and print TCP connection data
                 if ip_pk.protocol == 6:
                     tcp_seg = tcp.TCPSegment.from_packet(ip_pk)
-                    conn_tuple = (ip_pk.src_addr, tcp_seg.src_port,
-                                  ip_pk.dst_addr, tcp_seg.dst_port)
-                    if conn_tuple not in connections:
-                        l_str = f'{conn_tuple[0]}:{conn_tuple[1]}'
-                        r_str = f'{conn_tuple[2]}:{conn_tuple[3]}'
-                        reverse_tupel = (conn_tuple[2], 
-                                         conn_tuple[3], 
-                                         conn_tuple[0], 
-                                         conn_tuple[1])
-                        color = (100, 200, 100)
-                        if reverse_tupel in connections:
-                            color = (100, 100, 100)
-                        tools.print_rgb(f'TCP SESSION: {l_str} <-> {r_str}',
-                                rgb=color, bold=True, end='')
-                        if tcp_seg.syn == 1:
-                            tools.print_rgb(' SYN', rgb=(10, 200, 10), 
-                                    bold=True, end='')
-                        if tcp_seg.rst == 1:
-                            tools.print_rgb(' RST', rgb=(200, 10, 10), 
-                                    bold=True, end='')
-                        if tcp_seg.fin == 1:
-                            tools.print_rgb(' FIN', rgb=(200, 100, 100), 
-                                    bold=True, end='')
-                        if tcp_seg.ack == 1:
-                            tools.print_rgb(' ACK', rgb=(100, 100, 100), 
-                                    bold=True, end='')
-                        print()
-                        connections.append(conn_tuple)
+                    a_str = f'{ip_pk.src_addr}:{tcp_seg.src_port} -> {ip_pk.dst_addr}:{tcp_seg.dst_port}'
+                    seqacklen = f'SEQ:{tcp_seg.seq_nr} ACK:{tcp_seg.ack_nr} LEN:{tcp_seg.length}'
+                    flags = tcp_seg.get_flag_str
+                    color = (100, 200, 100)
+                    tools.print_rgb(f'{a_str}\t',
+                            rgb=color, bold=True, end='')
+                    color = (150, 150, 150)
+                    tools.print_rgb(seqacklen,
+                            rgb=color, bold=True, end='')
+                    color = (200, 150, 100)
+                    tools.print_rgb(f'\t{flags}',
+                            rgb=color, bold=False, end='')
 except KeyboardInterrupt: 
     tools.print_rgb('Ctrl-C -- Handing connections over...',
             rgb=(200, 0, 0), bold=True, end='')
