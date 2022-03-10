@@ -46,16 +46,22 @@ except ValueError:
     print(f'Invalid port, ack or sequence number')
     print(f'Usage: {sys.argv[0]} interface local_ip local_port remote_ip remote_port seq_nr ack_nr')
 
-tcp_handler = tcp.TCPHandler(if_name, local_port, remote_ip, block=1)
+tcp_handler = tcp.TCPHandler(if_name, local_port, remote_ip)
 tcp_handler.remote_port = remote_port
 tcp_handler.local_ip = local_ip
 tcp_handler._rcv_nxt = ack_nr
 tcp_handler._snd_nxt = seq_nr
+tcp_handler._snd_una = seq_nr
+tcp_handler._snd_wnd = 65535
+tcp_handler._rem_rwnd = 65535
 tcp_handler.state = tcp.TCPHandler.ESTABLISHED
+ch = ''
 try:
-    ch = getch()
-    tcp_handler.send(ch.encode())
-    data = tcp_handler.receive(65535)
-    print(data.decode)
-except KeyboardInterrupt:
+    while ch != chr(27):
+        ch = getch()
+        tcp_handler.send(ch.encode())
+        data = tcp_handler.receive(65535)
+        print(data.decode(), end='')
+finally:
+    print('\nQUIT')
     tcp_handler.close()
