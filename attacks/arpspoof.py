@@ -102,7 +102,7 @@ try:
                     tcp_seg = tcp.TCPSegment.from_packet(ip_pk)
                     a_str = f'{ip_pk.src_addr}:{tcp_seg.src_port} -> {ip_pk.dst_addr}:{tcp_seg.dst_port}'
                     seqacklen = f'SEQ:{tcp_seg.seq_nr} ACK:{tcp_seg.ack_nr} LEN:{tcp_seg.length}'
-                    flags = tcp_seg.get_flag_str
+                    flags = tcp_seg.get_flag_str()
                     color = (100, 200, 100)
                     tools.print_rgb(f'{a_str}\t',
                             rgb=color, bold=True, end='')
@@ -111,7 +111,7 @@ try:
                             rgb=color, bold=True, end='')
                     color = (200, 150, 100)
                     tools.print_rgb(f'\t{flags}',
-                            rgb=color, bold=False, end='')
+                            rgb=color, bold=False)
 except KeyboardInterrupt: 
     tools.print_rgb('Ctrl-C -- Handing connections over...',
             rgb=(200, 0, 0), bold=True, end='')
