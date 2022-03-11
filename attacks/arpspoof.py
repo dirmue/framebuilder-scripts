@@ -54,7 +54,7 @@ def get_mac_addr(ip_addr, if_name):
                             }
                     arp_msg = eth.ArpMessage(arp_data)
                     arp_msg.send(arp_sock)
-                    sleep(0.2)
+                    time.sleep(0.2)
                 else:
                     print(str(e))
                     sys.exit(1) 
