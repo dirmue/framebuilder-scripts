@@ -2,7 +2,7 @@
 
 '''Script for TCP hijacking'''
 
-import time, sys, tty, termios, select
+import os, time, sys, tty, termios, select
 from framebuilder import eth, ipv4, tcp, tools, errors
 
 def key_pressed():
@@ -86,6 +86,8 @@ def print_seg(tcp_seg):
 # validate parameters and initialize variables
 check_args()
 if_name = sys.argv[1]
+os.system(f'sysctl -w net.ipv4.conf.{if_name}.forwarding=0')
+os.system(f'sysctl -w net.ipv4.conf.{if_name}.send_redirects=0')
 client_ip = sys.argv[2]
 server_ip = sys.argv[3]
 client_port = 0
