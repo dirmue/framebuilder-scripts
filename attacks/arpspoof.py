@@ -57,6 +57,7 @@ def get_mac_addr(ip_addr, if_name):
                 time.sleep(0.2)
             else:
                 print(str(e))
+                arp_sock.close()
                 sys.exit(1) 
 
 
@@ -77,9 +78,9 @@ right_mac = get_mac_addr(right_ip, if_name)
 
 tools.print_rgb('--- ARP spoofer ---',
         rgb=(200, 200, 200), bold=True)
-tools.print_rgb(f'{left_ip}@{left_mac} --> {my_mac}',
+tools.print_rgb(f'{left_ip} @ {left_mac} --> {my_mac}',
         rgb=(200, 0, 0), bold=True)
-tools.print_rgb(f'{right_ip}@{right_mac} --> {my_mac}',
+tools.print_rgb(f'{right_ip} @ {right_mac} --> {my_mac}',
         rgb=(200, 0, 0), bold=True)
 
 arp_data_left = {'operation': 2,
