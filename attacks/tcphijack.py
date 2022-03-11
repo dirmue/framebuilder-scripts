@@ -137,8 +137,6 @@ term_attr = termios.tcgetattr(sys.stdin)
 try:
     tty.setcbreak(sys.stdin.fileno())
     new_tty_attr = termios.tcgetattr(sys.stdin)
-    new_tty_attr[3] |= termios.ECHO
-    termios.tcsetattr(sys.stdin, termios.TCSANOW, new_tty_attr)
     tools.print_rgb(f'Spoofing connections to {server_ip}:{server_port}',
             rgb=(200, 0, 0), bold=True)
     tools.print_rgb('press H to hijack the session...',
@@ -197,6 +195,8 @@ try:
                     cut_off_client(if_name, client_ip, server_ip, client_port,
                             server_port, seq_nr, ack_nr)
                     hijacked = True
+                    new_tty_attr[3] |= termios.ECHO
+                    termios.tcsetattr(sys.stdin, termios.TCSANOW, new_tty_attr)
         if hijacked:
             data = tcp_handler.receive(65535)
             print(data.decode(), end='')
