@@ -31,33 +31,33 @@ def get_mac_addr(ip_addr, if_name):
     gw = tools.get_route_gateway(ip_addr)
     if gw is not None:
         ip_addr = gw
-    if mac_addr is None:
-        arp_sock = tools.create_socket(if_name)
-        max_try = 5
-        for num_try in range(max_try):
-            try:
-                mac_addr = tools.get_mac_for_dst_ip(ip_addr)
-                if mac_addr is None:
-                    raise errors.FailedMACQueryException(f'IP {ip_addr}')
-            except errors.FailedMACQueryException as e:
-                # set an invalid ARP cache entry and try to update it
-                tools.set_neigh(if_name, ip_addr)
-                if num_try < max_try - 1:
-                    arp_data = {
-                            'operation': 1,
-                            'src_addr': if_mac,
-                            'dst_addr': 'ff:ff:ff:ff:ff:ff',
-                            'snd_hw_addr': if_mac,
-                            'snd_ip_addr': if_ip,
-                            'tgt_hw_addr': '00:00:00:00:00:00',
-                            'tgt_ip_addr': ip_addr
-                            }
-                    arp_msg = eth.ArpMessage(arp_data)
-                    arp_msg.send(arp_sock)
-                    time.sleep(0.2)
-                else:
-                    print(str(e))
-                    sys.exit(1) 
+    arp_sock = tools.create_socket(if_name)
+    max_try = 5
+    for num_try in range(max_try):
+        try:
+            mac_addr = tools.get_mac_for_dst_ip(ip_addr)
+            if mac_addr is None:
+                raise errors.FailedMACQueryException(f'IP {ip_addr}')
+            return mac_addr
+        except errors.FailedMACQueryException as e:
+            # set an invalid ARP cache entry and try to update it
+            tools.set_neigh(if_name, ip_addr)
+            if num_try < max_try - 1:
+                arp_data = {
+                        'operation': 1,
+                        'src_addr': if_mac,
+                        'dst_addr': 'ff:ff:ff:ff:ff:ff',
+                        'snd_hw_addr': if_mac,
+                        'snd_ip_addr': if_ip,
+                        'tgt_hw_addr': '00:00:00:00:00:00',
+                        'tgt_ip_addr': ip_addr
+                        }
+                arp_msg = eth.ArpMessage(arp_data)
+                arp_msg.send(arp_sock)
+                time.sleep(0.2)
+            else:
+                print(str(e))
+                sys.exit(1) 
 
 
 check_args()
