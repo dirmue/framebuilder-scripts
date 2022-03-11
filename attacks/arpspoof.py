@@ -52,7 +52,7 @@ def get_mac_addr(ip_addr, if_name):
                             'tgt_hw_addr': '00:00:00:00:00:00',
                             'tgt_ip_addr': ip_addr
                             }
-                    arp_msg = ArpMessage(arp_data)
+                    arp_msg = eth.ArpMessage(arp_data)
                     arp_msg.send(arp_sock)
                     sleep(0.2)
                 else:
