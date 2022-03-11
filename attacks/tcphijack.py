@@ -199,7 +199,7 @@ try:
                     hijacked = True
         if hijacked:
             data = tcp_handler.receive(65535)
-        print(data.decode(), end='')
+            print(data.decode(), end='')
 finally:
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, term_attr)
     if hijacked:
