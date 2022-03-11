@@ -72,7 +72,7 @@ my_mac = tools.get_mac_addr(if_name)
 interval = 10**9
 left_ip = sys.argv[2]
 left_mac = get_mac_addr(left_ip, if_name)
-right_ip = sys.argv[4]
+right_ip = sys.argv[3]
 right_mac = get_mac_addr(right_ip, if_name)
 
 tools.print_rgb('--- ARP spoofer ---',
