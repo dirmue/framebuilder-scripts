@@ -3,7 +3,7 @@
 '''Script for ARP spoofing'''
 
 import time, os, sys
-from framebuilder import defs, eth, ipv4, tcp, tools
+from framebuilder import eth, ipv4, tcp, tools, errors
 
 
 def print_err(msg):
