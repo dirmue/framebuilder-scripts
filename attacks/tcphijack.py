@@ -165,9 +165,11 @@ try:
                             ip_pk.dst_addr == server_ip,
                             tcp_seg.dst_port == server_port]
                     print_seg(tcp_seg)
-                    client_port = tcp_seg.src_port
-                    seq_nr = tcp_seg.seq_nr
-                    ack_nr = tcp_seg.ack_nr
+                    if all(hijack_filter):
+                        client_port = tcp_seg.src_port
+                        print(f'new client port: {client_port}')
+                        seq_nr = tcp_seg.seq_nr
+                        ack_nr = tcp_seg.ack_nr
                 if frame.src_addr == server_mac and ip_pk.dst_addr != my_ip:
                     eth_handler.remote_mac = client_mac
                     eth_handler.send(ip_pk)
