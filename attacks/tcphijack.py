@@ -52,7 +52,8 @@ def get_mac_addr(ip_addr, if_name):
                         'src_addr': if_mac,
                         'dst_addr': 'ff:ff:ff:ff:ff:ff',
                         'snd_hw_addr': if_mac,
-                        'snd_ip_addr': if_ip,
+                        #'snd_ip_addr': if_ip,
+                        'snd_ip_addr': '0.0.0.0',
                         'tgt_hw_addr': '00:00:00:00:00:00',
                         'tgt_ip_addr': ip_addr
                         }
