@@ -60,6 +60,7 @@ def get_mac_addr(ip_addr, if_name):
                     sys.exit(1) 
 
 
+check_args()
 if_name = sys.argv[1]
 os.system(f'sysctl -w net.ipv4.conf.{if_name}.forwarding=0')
 
