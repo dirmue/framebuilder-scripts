@@ -218,7 +218,7 @@ try:
                     tools.print_rgb('connection hijacked!',
                             rgb=(200, 150, 100), bold=True)
                     tools.print_rgb('type some command: ',
-                            rgb=(100, 100, 100), bold=False, end='')
+                            rgb=(100, 100, 100), bold=False)
                     new_tty_attr[3] |= termios.ECHO
                     termios.tcsetattr(sys.stdin, termios.TCSANOW, new_tty_attr)
         if hijacked:
