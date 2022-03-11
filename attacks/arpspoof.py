@@ -38,7 +38,7 @@ def get_mac_addr(ip_addr, if_name):
             try:
                 mac_addr = tools.get_mac_for_dst_ip(ip_addr)
                 if mac_addr is None:
-                    raise FailedMACQueryException(f'IP {packet.dst_addr}')
+                    raise errors.FailedMACQueryException(f'IP {ip_addr}')
             except errors.FailedMACQueryException as e:
                 # set an invalid ARP cache entry and try to update it
                 tools.set_neigh(if_name, ip_addr)
