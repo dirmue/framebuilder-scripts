@@ -197,6 +197,8 @@ class Hijacker:
         tools.print_rgb(seg_str, self.GREY, bold=False)
 
     def __process_frame(self, frame):
+        if frame is None:
+            return
         ip_pk = ipv4.IPv4Packet.from_frame(frame)
         tcp_seg = tcp.TCPSegment.from_packet(ip_pk) if ip_pk.protocol == 6 else None
         if not self.__must_forward(ip_pk):
