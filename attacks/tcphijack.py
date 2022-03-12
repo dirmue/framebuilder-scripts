@@ -45,6 +45,16 @@ class ArpHandler:
             'tgt_hw_addr': self.tgt_hw_addr,
             'tgt_ip_addr': self.tgt_ip_addr})
 
+    def __str__(self) -> str:
+        info_string = f'interface: {self.interface}'
+        info_string += f'\noperation: {self.operation}'
+        info_string += f'\nsrc_addr: {self.src_addr}'
+        info_string += f'\ndst_addr: {self.dst_addr}'
+        info_string += f'\nsnd_hw_addr: {self.snd_hw_addr}'
+        info_string += f'\nsnd_ip_addr: {self.snd_ip_addr}'
+        info_string += f'\ntgt_hw_addr: {self.tgt_hw_addr}'
+        info_string += f'\ntgt_ip_addr: {self.tgt_ip_addr}'
+
     def send(self):
         arp_msg = self.__compile_arp_message()
         arp_msg.send(self.socket)
