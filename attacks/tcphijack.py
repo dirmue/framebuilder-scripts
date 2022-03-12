@@ -10,7 +10,7 @@ import sys
 import tty
 import termios
 import select
-from framebuilder import eth, ipv4, tcp, tools
+from framebuilder import eth, ipv4, tcp, tools, errors
 
 class Host:
 
@@ -137,14 +137,15 @@ class Hijacker:
 
     def get_mac_addr(self, ip_addr:str, if_name:str) -> str:
         arp_querier = ArpHandler(if_name, snd_ip_addr='0.0.0.0', tgt_ip_addr=ip_addr)
-        mac_addr = tools.get_mac_for_dst_ip(ip_addr)
         for _ in range(5):
-            if mac_addr is not None:
+            try:
+                mac_addr = tools.get_mac_for_dst_ip(ip_addr)
                 return mac_addr
-            # set an invalid ARP cache entry and try to update it
-            tools.set_neigh(if_name, ip_addr)
-            arp_querier.send()
-            time.sleep(0.2)
+            except errors.FailedMACQueryException:
+                # set an invalid ARP cache entry and try to update it
+                tools.set_neigh(if_name, ip_addr)
+                arp_querier.send()
+                time.sleep(0.2)
         return '00:00:00:00:00:00'
 
     def cut_off_client(self):
