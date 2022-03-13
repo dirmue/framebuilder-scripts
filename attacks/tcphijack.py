@@ -58,7 +58,7 @@ class ArpHandler:
     def send(self):
         arp_msg = self.__compile_arp_message()
         socket = tools.create_socket(self.interface, blocking=0)
-        arp_msg.send(self.socket)
+        arp_msg.send(socket)
         socket.close()
 
 
