@@ -33,7 +33,6 @@ class ArpHandler:
         self.snd_ip_addr = kwargs.get('snd_ip_addr', tools.get_if_ipv4_addr(interface))
         self.tgt_hw_addr = kwargs.get('tgt_hw_addr', '00:00:00:00:00:00')
         self.tgt_ip_addr = kwargs.get('tgt_ip_addr', '0.0.0.0')
-        self.socket = tools.create_socket(interface, blocking=0)
 
     def __compile_arp_message(self) -> eth.ArpMessage:
         return eth.ArpMessage({
@@ -58,7 +57,9 @@ class ArpHandler:
 
     def send(self):
         arp_msg = self.__compile_arp_message()
+        socket = tools.create_socket(self.interface, blocking=0)
         arp_msg.send(self.socket)
+        socket.close()
 
 
 class TermHandler:
