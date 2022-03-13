@@ -93,7 +93,7 @@ class Hijacker:
 
     RED = (200, 0, 0)
     GREEN = (0, 200, 0)
-    BLUE = (0, 0, 200)
+    BLUE = (0, 0, 250)
     GREY = (100, 100, 100)
     ORANGE = (200, 150, 100)
 
@@ -117,6 +117,30 @@ class Hijacker:
         self.arp_interval_ns = 10 ** 9
         self.eth_handler = eth.EthernetHandler(interface, local_mac=local_mac_addr, block=0)
         self.tcp_handler = None
+
+    def __intro(self):
+        tools.print_rgb('******************', self.ORANGE, bold=True)
+        tools.print_rgb('*  TCP Hijacker  *', self.ORANGE, bold=True)
+        tools.print_rgb('******************', self.ORANGE, bold=True)
+        host_str = f'interface: {self.interface} ('
+        host_str += f' {self.local_host.ip_addr} / {self.local_host.mac_addr})'
+        tools.print_rgb(host_str, self.GREY, bold=True)
+        tools.print_rgb('service port: {self.server_port}', self.GREEN, bold=True)
+        client_str = f'client: {self.client.ip_addr} ({self.client.mac_addr})'
+        if self.client_gateway is not None:
+            client_str += f'\ngw: {self.client_gateway.ip_addr} ('
+            client_str += f'{self.client_gateway.mac_addr})'
+        else:
+            client_str += '\ngw: None (on link)'
+        tools.print_rgb(client_str, self.BLUE, bold=True)
+        server_str = f'server: {self.server.ip_addr} ({self.server.mac_addr})'
+        if self.server_gateway is not None:
+            server_str += f'\ngw: {self.server_gateway.ip_addr} ('
+            server_str += f'{self.server_gateway.mac_addr})'
+        else:
+            server_str += '\ngw: None (on link)'
+        tools.print_rgb(server_str, self.RED, bold=True)
+        tools.print_rgb('- press h to hijack the connection -', self.GREEN, bold=False)
 
     def __setup_spoofers(self, local_mac_addr) -> (ArpHandler, ArpHandler):
         client_arp_ip = self.client.ip_addr
@@ -308,6 +332,7 @@ class Hijacker:
 
     def run(self):
         self.term_handler.set_cbreak()
+        self.__intro()
         while self.term_handler.last_key != chr(4):
             self.__spoof()
             self.__process_frame(self.__next_frame())
