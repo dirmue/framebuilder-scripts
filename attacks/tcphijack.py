@@ -33,7 +33,7 @@ class ArpHandler:
         self.snd_ip_addr = kwargs.get('snd_ip_addr', tools.get_if_ipv4_addr(interface))
         self.tgt_hw_addr = kwargs.get('tgt_hw_addr', '00:00:00:00:00:00')
         self.tgt_ip_addr = kwargs.get('tgt_ip_addr', '0.0.0.0')
-        self.socket = tools.create_socket(interface)
+        self.socket = tools.create_socket(interface, blocking=0)
 
     def __compile_arp_message(self) -> eth.ArpMessage:
         return eth.ArpMessage({
@@ -114,7 +114,7 @@ class Hijacker:
         self.hijacked = False
         self.current_time = 0
         self.arp_interval_ns = 10 ** 9
-        self.eth_handler = eth.EthernetHandler(interface, local_mac=local_mac_addr)
+        self.eth_handler = eth.EthernetHandler(interface, local_mac=local_mac_addr, block=0)
         self.tcp_handler = None
 
     def __setup_spoofers(self, local_mac_addr) -> (ArpHandler, ArpHandler):
@@ -250,7 +250,7 @@ class Hijacker:
             if key in ('h', 'H'):
                 self.cut_off_client()
                 self.tcp_handler = tcp.TCPHandler(self.interface,
-                        self.client_port, self.server.ip_addr)
+                        self.client_port, self.server.ip_addr, block=0)
                 self.tcp_handler.remote_port = self.server_port
                 self.tcp_handler.local_ip = self.client.ip_addr
                 self.tcp_handler._rcv_nxt = self.ack_nr
