@@ -125,7 +125,7 @@ class Hijacker:
         host_str = f'interface: {self.interface} ('
         host_str += f' {self.local_host.ip_addr} / {self.local_host.mac_addr})'
         tools.print_rgb(host_str, self.GREY, bold=True)
-        tools.print_rgb('service port: {self.server_port}', self.GREEN, bold=True)
+        tools.print_rgb(f'service port: {self.server_port}', self.GREEN, bold=True)
         client_str = f'client: {self.client.ip_addr} ({self.client.mac_addr})'
         if self.client_gateway is not None:
             client_str += f'\ngw: {self.client_gateway.ip_addr} ('
@@ -339,6 +339,7 @@ class Hijacker:
             self.__process_input(self.term_handler.get_key())
             self.__receive_data()
         self.__tear_down()
+        tools.print_rgb('\nTerminated\n', self.ORANGE, bold=True)
 
 
 if __name__ == '__main__':
