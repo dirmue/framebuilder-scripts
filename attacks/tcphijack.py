@@ -205,6 +205,8 @@ class Hijacker:
         seg_str = f'{tcp_seg.src_port}->{tcp_seg.dst_port} '
         seg_str += f'seq {tcp_seg.seq_nr} ack {tcp_seg.ack_nr} '
         seg_str += f'len {tcp_seg.length} flags {tcp_seg.get_flag_str()}'
+        if tcp_seg.length > 0:
+            seg_str += f' -- data: {tcp_seg.payload.decode()}'
         tools.print_rgb(seg_str, self.GREY, bold=False)
 
     def __process_segment(self, ip_pk:ipv4.IPv4Packet, tcp_seg:tcp.TCPSegment):
@@ -216,10 +218,9 @@ class Hijacker:
             if self.client_port == 0 and ip_pk.src_addr == self.client.ip_addr:
                 self.client_port = tcp_seg.src_port
             if self.__from_client(ip_pk, tcp_seg):
-                self.client_port = tcp_seg.src_port
                 self.seq_nr = tcp_seg.seq_nr
                 self.ack_nr = tcp_seg.ack_nr
-                self.__print_segment(tcp_seg)
+            self.__print_segment(tcp_seg)
             return True
 
     def __process_frame(self, frame):
