@@ -85,7 +85,7 @@ class TermHandler:
         if key_pressed:
             self.last_key = sys.stdin.read(1)
             return self.last_key
-        return chr(255)
+        return None
 
 
 class Hijacker:
@@ -242,7 +242,7 @@ class Hijacker:
             self.eth_handler.remote_mac = server_mac
             self.eth_handler.send(ip_pk)
 
-    def __handle_input(self, key:chr):
+    def __process_input(self, key:chr):
         if not self.hijacked:
             if key in ('h', 'H'):
                 self.cut_off_client()
@@ -260,7 +260,7 @@ class Hijacker:
                 tools.print_rgb('connection hijacked!', rgb=self.ORANGE, bold=True)
                 tools.print_rgb('type some command: ', rgb=self.GREY, bold=False)
                 self.term_handler.echo_on()
-        elif key != chr(4) and key != chr(255):
+        elif key != chr(4) and key is not None:
             self.tcp_handler.send(key.encode())
 
     def __receive_data(self):
@@ -307,7 +307,7 @@ class Hijacker:
         while self.term_handler.last_key != chr(4):
             self.__spoof()
             self.__process_frame(self.__next_frame())
-            self.__handle_input(self.term_handler.get_key())
+            self.__process_input(self.term_handler.get_key())
             self.__receive_data()
         self.__tear_down()
 
