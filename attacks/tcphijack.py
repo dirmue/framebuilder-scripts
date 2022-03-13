@@ -206,7 +206,7 @@ class Hijacker:
         seg_str += f'seq {tcp_seg.seq_nr} ack {tcp_seg.ack_nr} '
         seg_str += f'len {tcp_seg.length} flags {tcp_seg.get_flag_str()}'
         if tcp_seg.length > 0:
-            seg_str += f' -- data: {tcp_seg.payload.decode()}'
+            seg_str += f' -- data: {tcp_seg.payload}'
         tools.print_rgb(seg_str, self.GREY, bold=False)
 
     def __process_segment(self, ip_pk:ipv4.IPv4Packet, tcp_seg:tcp.TCPSegment):
