@@ -339,6 +339,7 @@ class Hijacker:
             self.__process_input(self.term_handler.get_key())
             self.__receive_data()
         self.__tear_down()
+        tools.print_rgb('\nTerminated\n', self.ORANGE, bold=True)
 
 
 if __name__ == '__main__':
