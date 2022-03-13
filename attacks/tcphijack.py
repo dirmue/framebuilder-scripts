@@ -125,22 +125,22 @@ class Hijacker:
         host_str = f'interface: {self.interface} ('
         host_str += f' {self.local_host.ip_addr} / {self.local_host.mac_addr})'
         tools.print_rgb(host_str, self.GREY, bold=True)
-        tools.print_rgb(f'service port: {self.server_port}', self.GREEN, bold=True)
+        tools.print_rgb(f'service port: {self.server_port}', self.GRAY, bold=True)
         client_str = f'client: {self.client.ip_addr} ({self.client.mac_addr})'
         if self.client_gateway is not None:
             client_str += f'\ngw: {self.client_gateway.ip_addr} ('
             client_str += f'{self.client_gateway.mac_addr})'
         else:
             client_str += '\ngw: None (on link)'
-        tools.print_rgb(client_str, self.BLUE, bold=True)
+        tools.print_rgb(client_str, self.GREY, bold=True)
         server_str = f'server: {self.server.ip_addr} ({self.server.mac_addr})'
         if self.server_gateway is not None:
             server_str += f'\ngw: {self.server_gateway.ip_addr} ('
             server_str += f'{self.server_gateway.mac_addr})'
         else:
             server_str += '\ngw: None (on link)'
-        tools.print_rgb(server_str, self.RED, bold=True)
-        tools.print_rgb('- press h to hijack the connection -', self.GREEN, bold=False)
+        tools.print_rgb(server_str, self.GREY, bold=True)
+        tools.print_rgb('- press h to hijack the connection -', self.GREEN, bold=True)
 
     def __setup_spoofers(self, local_mac_addr) -> (ArpHandler, ArpHandler):
         client_arp_ip = self.client.ip_addr
@@ -227,12 +227,15 @@ class Hijacker:
             self.server_port == tcp_seg.src_port])
 
     def __print_segment(self, tcp_seg:tcp.TCPSegment):
+        color = self.GREY
+        if self.server_port in (tcp_seg.src_port, tcp_seg.dst_port):
+            color = self.GREEN
         seg_str = f'{tcp_seg.src_port}->{tcp_seg.dst_port} '
         seg_str += f'seq {tcp_seg.seq_nr} ack {tcp_seg.ack_nr} '
         seg_str += f'len {tcp_seg.length} flags {tcp_seg.get_flag_str()}'
         if tcp_seg.length > 0:
             seg_str += f' -- data: {tcp_seg.payload}'
-        tools.print_rgb(seg_str, self.GREY, bold=False)
+        tools.print_rgb(seg_str, color, bold=False)
 
     def __process_segment(self, ip_pk:ipv4.IPv4Packet, tcp_seg:tcp.TCPSegment):
         if tcp_seg is not None:
