@@ -248,7 +248,8 @@ class Hijacker:
             if self.__from_client(ip_pk, tcp_seg):
                 self.seq_nr = tcp_seg.seq_nr
                 self.ack_nr = tcp_seg.ack_nr
-            self.__print_segment(tcp_seg)
+            if not self.hijacked:
+                self.__print_segment(tcp_seg)
             return True
 
     def __process_frame(self, frame):
