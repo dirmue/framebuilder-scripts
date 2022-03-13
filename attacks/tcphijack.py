@@ -85,7 +85,7 @@ class TermHandler:
         if key_pressed:
             self.last_key = sys.stdin.read(1)
             return self.last_key
-        return chr(0)
+        return chr(255)
 
 
 class Hijacker:
@@ -215,7 +215,6 @@ class Hijacker:
                 return
             if self.client_port == 0 and ip_pk.src_addr == self.client.ip_addr:
                 self.client_port = tcp_seg.src_port
-                self.__print_segment(tcp_seg)
             if self.__from_client(ip_pk, tcp_seg):
                 self.client_port = tcp_seg.src_port
                 self.seq_nr = tcp_seg.seq_nr
@@ -261,7 +260,7 @@ class Hijacker:
                 tools.print_rgb('connection hijacked!', rgb=self.ORANGE, bold=True)
                 tools.print_rgb('type some command: ', rgb=self.GREY, bold=False)
                 self.term_handler.echo_on()
-        elif key != chr(4):
+        elif key != chr(4) and key != chr(255):
             self.tcp_handler.send(key.encode())
 
     def __receive_data(self):
@@ -269,7 +268,7 @@ class Hijacker:
             return
         data = self.tcp_handler.receive(65535).decode()
         if data != '':
-            print(data)
+            print(data, end='')
 
     def __tear_down(self):
         if self.hijacked:
