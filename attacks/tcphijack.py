@@ -10,6 +10,7 @@ import sys
 import tty
 import termios
 import select
+from typing import Optional
 from framebuilder import eth, ipv4, tcp, tools, errors
 
 class Host:
@@ -80,7 +81,7 @@ class TermHandler:
         self.attr[3] |= termios.ECHO
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.attr)
 
-    def get_key(self) -> chr:
+    def get_key(self) -> Optional[chr]:
         stdin = sys.stdin
         key_pressed = select.select([stdin], [], [], 0) == ([stdin], [], [])
         if key_pressed:
@@ -165,13 +166,14 @@ class Hijacker:
                 tgt_ip_addr=client_arp_ip)
         return client_spoofer, server_spoofer
 
-    def find_gateway_to(self, target_host:Host) -> Host:
+    def find_gateway_to(self, target_host:Host) -> Optional[Host]:
         gateway_ip = tools.get_route_gateway(target_host.ip_addr)
         if gateway_ip is not None:
             return Host(gateway_ip, self.get_mac_addr(gateway_ip, self.interface))
         return None
 
-    def get_mac_addr(self, ip_addr:str, if_name:str) -> str:
+    @staticmethod
+    def get_mac_addr(ip_addr:str, if_name:str) -> str:
         arp_querier = ArpHandler(if_name, snd_ip_addr='0.0.0.0', tgt_ip_addr=ip_addr)
         for _ in range(5):
             try:
