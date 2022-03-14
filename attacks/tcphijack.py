@@ -243,12 +243,11 @@ class Hijacker:
                 return False
             if self.hijacked and self.__from_server(ip_pk, tcp_seg):
                 return False
-            if self.client_port == 0 and ip_pk.src_addr == self.client.ip_addr:
-                self.client_port = tcp_seg.src_port
             if self.__from_client(ip_pk, tcp_seg):
-                if self.server_port in (tcp_seg.src_port, tcp_seg.dst_port):
-                    self.seq_nr = tcp_seg.seq_nr
-                    self.ack_nr = tcp_seg.ack_nr
+                if self.client_port == 0:
+                    self.client_port = tcp_seg.src_port
+                self.seq_nr = tcp_seg.seq_nr
+                self.ack_nr = tcp_seg.ack_nr
             if not self.hijacked:
                 self.__print_segment(tcp_seg)
             return True
