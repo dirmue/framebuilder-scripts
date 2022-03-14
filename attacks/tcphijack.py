@@ -122,8 +122,8 @@ class Hijacker:
         tools.print_rgb('******************', self.ORANGE, bold=True)
         tools.print_rgb('*  TCP Hijacker  *', self.ORANGE, bold=True)
         tools.print_rgb('******************', self.ORANGE, bold=True)
-        host_str = f'interface: {self.interface} ('
-        host_str += f' {self.local_host.ip_addr} / {self.local_host.mac_addr})'
+        host_str = f'interface: {self.interface} '
+        host_str += f'({self.local_host.ip_addr} / {self.local_host.mac_addr})'
         tools.print_rgb(host_str, self.GREY, bold=True)
         tools.print_rgb(f'service port: {self.server_port}', self.GREY, bold=True)
         client_str = f'client: {self.client.ip_addr} ({self.client.mac_addr})'
@@ -239,13 +239,17 @@ class Hijacker:
 
     def __process_segment(self, ip_pk:ipv4.IPv4Packet, tcp_seg:tcp.TCPSegment):
         if tcp_seg is not None:
+            client_port_conditions = [self.client_port == 0,
+                    ip_pk.src_addr == self.client.ip_addr,
+                    ip_pk.dst_addr == self.server.ip_addr,
+                    tcp_seg.dst_port == self.server_port]
+            if all(client_port_conditions):
+                self.client_port = tcp_seg.src_port
             if self.hijacked and self.__from_client(ip_pk, tcp_seg):
                 return False
             if self.hijacked and self.__from_server(ip_pk, tcp_seg):
                 return False
             if self.__from_client(ip_pk, tcp_seg):
-                if self.client_port == 0:
-                    self.client_port = tcp_seg.src_port
                 self.seq_nr = tcp_seg.seq_nr
                 self.ack_nr = tcp_seg.ack_nr
             if not self.hijacked:
@@ -289,7 +293,8 @@ class Hijacker:
                 self.tcp_handler._rem_rwnd = 65535
                 self.tcp_handler.state = tcp.TCPHandler.ESTABLISHED
                 self.hijacked = True
-                tools.print_rgb('connection hijacked!', rgb=self.ORANGE, bold=True)
+                hijacked_str=f'connection hijacked (client port: {self.client_port})!'
+                tools.print_rgb(hijacked_str, rgb=self.ORANGE, bold=True)
                 tools.print_rgb('type some command: ', rgb=self.GREY, bold=False)
                 self.term_handler.echo_on()
         elif key != chr(4) and key is not None:
