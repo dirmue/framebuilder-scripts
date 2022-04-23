@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import sys
-from framebuilder import tools, eth
+from random import randrange
+from framebuilder import eth
 
 if len(sys.argv) < 2:
     print('Missing arguments')
