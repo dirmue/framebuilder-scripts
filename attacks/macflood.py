@@ -2,7 +2,7 @@
 
 import sys
 from random import randrange
-from framebuilder import eth
+from framebuilder import tools, eth
 
 if len(sys.argv) < 2:
     print('Missing arguments')
