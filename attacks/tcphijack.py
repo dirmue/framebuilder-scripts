@@ -240,23 +240,22 @@ class Hijacker:
         tools.print_rgb(seg_str, color, bold=False)
 
     def __process_segment(self, ip_pk:ipv4.IPv4Packet, tcp_seg:tcp.TCPSegment):
-        if tcp_seg is not None:
-            client_port_conditions = [self.client_port == 0,
-                    ip_pk.src_addr == self.client.ip_addr,
-                    ip_pk.dst_addr == self.server.ip_addr,
-                    tcp_seg.dst_port == self.server_port]
-            if all(client_port_conditions):
-                self.client_port = tcp_seg.src_port
-            if self.hijacked and self.__from_client(ip_pk, tcp_seg):
-                return False
-            if self.hijacked and self.__from_server(ip_pk, tcp_seg):
-                return False
-            if self.__from_client(ip_pk, tcp_seg):
-                self.seq_nr = tcp_seg.seq_nr
-                self.ack_nr = tcp_seg.ack_nr
-            if not self.hijacked:
-                self.__print_segment(tcp_seg)
-            return True
+        client_port_conditions = [self.client_port == 0,
+                ip_pk.src_addr == self.client.ip_addr,
+                ip_pk.dst_addr == self.server.ip_addr,
+                tcp_seg.dst_port == self.server_port]
+        if all(client_port_conditions):
+            self.client_port = tcp_seg.src_port
+        if self.hijacked and self.__from_client(ip_pk, tcp_seg):
+            return False
+        if self.hijacked and self.__from_server(ip_pk, tcp_seg):
+            return False
+        if self.__from_client(ip_pk, tcp_seg):
+            self.seq_nr = tcp_seg.seq_nr
+            self.ack_nr = tcp_seg.ack_nr
+        if not self.hijacked:
+            self.__print_segment(tcp_seg)
+        return True
 
     def __process_frame(self, frame):
         if frame is None:
@@ -265,7 +264,7 @@ class Hijacker:
         tcp_seg = tcp.TCPSegment.from_packet(ip_pk) if ip_pk.protocol == 6 else None
         if not self.__must_forward(ip_pk):
             return
-        if not self.__process_segment(ip_pk, tcp_seg):
+        if if tcp_seg is not None and not self.__process_segment(ip_pk, tcp_seg):
             return
         server_mac = self.server.mac_addr
         if self.server_gateway is not None:
