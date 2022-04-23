@@ -264,7 +264,7 @@ class Hijacker:
         tcp_seg = tcp.TCPSegment.from_packet(ip_pk) if ip_pk.protocol == 6 else None
         if not self.__must_forward(ip_pk):
             return
-        if if tcp_seg is not None and not self.__process_segment(ip_pk, tcp_seg):
+        if tcp_seg is not None and not self.__process_segment(ip_pk, tcp_seg):
             return
         server_mac = self.server.mac_addr
         if self.server_gateway is not None:
