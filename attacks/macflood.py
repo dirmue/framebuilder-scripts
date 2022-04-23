@@ -22,7 +22,6 @@ try:
             src_mac += f':{format(randrange(256), "02x")}'
         frame.src_addr = src_mac
         frame.send(socket)
-        count += 1
         info = f'src={src_mac}'
         tools.print_rgb(info, rgb=(200, 200, 200), bold=True)
 except KeyboardInterrupt:
