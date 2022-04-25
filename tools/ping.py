@@ -47,16 +47,16 @@ t_init = time.time_ns()
 print(f'PING {sys.argv[1]} ({dst_ip}): {pl_length} data bytes')
 try:
     while True:
-        # initialize timers
-        t_start = time.time_ns()
-        t_out = 1.0 # time out 1s
-        t_diff = 0.0
-
         r_echo_reply = None
         waiting_for_answer = True
 
         ip_handler.send(echo_req, dont_frag=True)
         pk_sent += 1
+
+        # initialize timers
+        t_start = time.time_ns()
+        t_out = 1.0 # time out 1s
+        t_diff = 0.0
 
         while waiting_for_answer and t_diff < t_out:
             
