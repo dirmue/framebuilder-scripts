@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import socket
-from framebuilder import ipv4, eth, tcp, tools
+from framebuilder import ipv4, eth, tcp, tools, errors
 
 
 def encapsulate_and_send(socket, frame, packet, segment):
@@ -30,6 +30,7 @@ dst_ip = sys.argv[1]
 if not tools.is_valid_ipv4_address(sys.argv[1]):
     try:
         dst_ip = socket.gethostbyname(sys.argv[1])
+        tools.print_rgb(f'> RESOLVED {sys.argv[1]}: {dst_ip}', (100, 100, 100))
     except:
         sys.exit(1)
 
@@ -38,37 +39,31 @@ try:
 except ValueError:
     print('Error: invalid remote port')
 
-# obtain routing information
-rt_info = tools.get_route(dst_ip)
-# get neighbor cache
-n_cache = tools.get_neigh_cache()
+if_name = 'lo'
+try:
+    if_name = tools.get_route_if_name(dst_ip)
+    tools.print_rgb(f'> INTERFACE: {if_name}', (100, 100, 100))
+except errors.FailedMACQueryException:
+    tools.print_rgb(f'{sys.argv[1]} not reachable', rgb=(200,0,0))
+    sys.exit(1)
 
-# set source MAC and IP address
-src_mac = tools.get_mac_addr(rt_info['dev'])
-src_ip = rt_info['prefsrc']
-src_port = 12345
-
-# set destination MAC address
-dst_mac = "00:00:00:00:00:00"
-
-# check if there is a gateway and query neighbor cache for MAC address
-if rt_info.get("gateway", None) is not None:
-    for n_entry in n_cache:
-        if n_entry['dst'] == rt_info['gateway']:
-            dst_mac = n_entry['lladdr']
-            break
-# if not query destination IP address
-else:
-    for n_entry in n_cache:
-        if n_entry['dst'] == dst_ip:
-            dst_mac = n_entry['lladdr']
-            break
+src_mac = tools.get_mac_addr(if_name)
+tools.print_rgb(f'> LOCAL MAC: {src_mac}', (100, 100, 100))
+src_ip = tools.get_if_ipv4_addr(if_name)
+tools.print_rgb(f'> LOCAL IP: {src_ip}', (100, 100, 100))
+src_port = tools.get_local_tcp_port()
+tools.print_rgb(f'> LOCAL PORT: {src_port}', (100, 100, 100))
+dst_mac = ''
+try:
+    dst_mac = tools.get_mac_for_dst_ip(dst_ip)
+    tools.print_rgb(f'> REMOTE MAC: {dst_mac}', (100, 100, 100))
+except errors.FailedMACQueryException:
+    tools.print_rgb('Failed to obtain destination MAC address', rgb=(200,0,0))
+    sys.exit(1)
 
 pid = os.getpid()
-sock = tools.create_socket(rt_info['dev'])
-
-print('\nSaying "Hello World" from {}:{} to {}:{}\n'.format(src_ip, src_port,
-                                                            dst_ip, dst_port))
+tools.print_rgb(f'> IPv4 IDENTIFICATION: {pid & 0xffff}', (100, 100, 100))
+sock = tools.create_socket(if_name)
 
 frame = eth.Frame()
 frame.src_addr = src_mac
@@ -80,10 +75,10 @@ packet.src_addr = src_ip
 packet.dst_addr = dst_ip
 packet.protocol = 6
 packet.ttl = 64
-packet.identification = pid
+packet.identification = pid & 0xffff
 
-# initial sequence number
 isn = tools.get_rfc793_isn()
+tools.print_rgb(f'> INITIAL SEQUENCE NUMBER: {isn}', (100, 100, 100))
 
 segment = tcp.TCPSegment()
 segment.src_port = src_port
@@ -93,9 +88,11 @@ segment.window = 65535
 segment.syn = 1
 segment.add_tcp_mss_option(1400)
 
+print(f'\nSaying "Hello World" from {src_ip}:{src_port} to {dst_ip}:{dst_port}\n')
+
 try:
     # hide local port
-    tools.hide_from_kernel(rt_info['dev'], dst_ip, dst_port)
+    tools.hide_from_kernel(if_name, dst_ip, dst_port)
     # send SYN
     encapsulate_and_send(sock, frame, packet, segment)
     tools.print_rgb('> SYN SENT', (0, 200, 0))
@@ -188,5 +185,5 @@ except KeyboardInterrupt:
 finally:
     print('\nCleaning up...')
     sock.close()
-    tools.unhide_from_kernel(rt_info['dev'], dst_ip, dst_port)
+    tools.unhide_from_kernel(if_name, dst_ip, dst_port)
     print('Bye!')
