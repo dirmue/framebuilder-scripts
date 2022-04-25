@@ -98,9 +98,9 @@ if __name__ == '__main__':
             frame = ether.Frame.from_bytes(data)
 
             # only allow following packets
-            # cond = [frame.ether_type == 0x0806,
-            #        frame.ether_type == 0x0800]
-            # frame_cond = [frame.ether_type == 0x0800]
+            # filter_cond = [True] --> Show all
+            # filter_cond = [frame.ether_type == 0x0806] --> ARP only
+            # filter_cond = [frame.ether_type == 0x0800] --> IPv4 only
             filter_cond = [True]
             
             if not any(filter_cond):
