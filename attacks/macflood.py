@@ -32,7 +32,7 @@ try:
         frame.send(socket)
         info = f'dst={frame.dst_addr} src={src_mac} ether_type={frame.ether_type}'
         tools.print_rgb(info, rgb=(200, 200, 200), bold=True)
-        sleep(0.1)
+        sleep(0.0001)
 except KeyboardInterrupt:
     tools.print_rgb('\nstopped; Goodbye!', rgb=(0, 200, 0), bold=True)
     socket.close()
