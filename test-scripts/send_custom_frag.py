@@ -9,7 +9,7 @@ from framebuilder import tcp, ipv4, tools
 
 if len(sys.argv) < 3:
     print('Argument missing. Usage: ' + sys.argv[0] + \
-            '<interface> <remote IP> [remote port]')
+            ' <interface> <remote IP> [remote port]')
     sys.exit(1)
 
 if os.geteuid() != 0:
