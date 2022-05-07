@@ -360,7 +360,7 @@ class Hijacker:
             tools.print_rgb('\nCtrl-C...', self.ORANGE, bold=True, end='')
         finally:
             self.__tear_down()
-            tools.print_rgb('\nTerminated\n', self.ORANGE, bold=True)
+            tools.print_rgb('Terminated\n', self.ORANGE, bold=True)
 
 
 if __name__ == '__main__':
