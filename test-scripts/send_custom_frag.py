@@ -4,7 +4,7 @@
 
 import os
 import sys
-from framebuilder import tcp, ipv4, tools
+from framebuilder import udp, ipv4, tools
 
 
 if len(sys.argv) < 3:
@@ -25,7 +25,7 @@ ip_handler = ipv4.IPv4Handler(
         sys.argv[1], sys.argv[2],
         tools.get_if_ipv4_addr(sys.argv[1]),
         proto=17)
-udp_dgram = tcp.TCPSegment()
+udp_dgram = udp.UDPDatagram()
 udp_dgram.src_port = 44444
 if len(sys.argv) < 4:
     udp_dgram.dst_port = 80
@@ -33,4 +33,5 @@ else:
     udp_dgram.dst_port = int(sys.argv[3])
 udp_dgram.syn = 1
 udp_dgram.payload = b'\xaa' * 5000
+udp_dgram.info()
 ip_handler.send(udp_dgram)
