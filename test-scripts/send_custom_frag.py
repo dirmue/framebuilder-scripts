@@ -32,6 +32,6 @@ if len(sys.argv) < 4:
 else:
     udp_dgram.dst_port = int(sys.argv[3])
 udp_dgram.syn = 1
-udp_dgram.payload = b'\xaa' * 5000
+udp_dgram.payload = b'\x42' * 5000
 udp_dgram.info()
 ip_handler.send(udp_dgram)
