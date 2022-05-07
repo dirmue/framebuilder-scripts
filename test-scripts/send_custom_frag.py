@@ -1,28 +1,36 @@
 #!/usr/bin/env python3
 
+'''Send an oversized IPv4 packet'''
+
 import os
 import sys
-import random
-from framebuilder import tcp, ipv4, eth, tools, errors
+from framebuilder import tcp, ipv4, tools
 
 
-if len(sys.argv) < 2:
+if len(sys.argv) < 3:
     print('Argument missing. Usage: ' + sys.argv[0] + \
-            ' <remote IP>')
+            '<interface> <remote IP> [remote port]')
     sys.exit(1)
 
-if (os.geteuid() != 0):
+if os.geteuid() != 0:
     print('You need to be root.')
     sys.exit(1)
 
-if not tools.is_valid_ipv4_address(sys.argv[1]):
-    raise errors.InvalidIPv4AddrException(sys.argv[1])
+if not tools.is_valid_ipv4_address(sys.argv[2]):
+    print('Invalid remote IP address')
+    sys.exit(1)
 
-dst_ip = sys.argv[1]
-ip_handler = ipv4.IPv4Handler('lo', dst_ip, '8.8.8.8')
-tcp_segment = tcp.TCPSegment()
-tcp_segment.src_port = 33333
-tcp_segment.dst_port = 80
-tcp_segment.syn = 1
-tcp_segment.payload = random.randbytes(5000)
-ip_handler.send(tcp_segment)
+dst_ip = sys.argv[2]
+ip_handler = ipv4.IPv4Handler(
+        sys.argv[1], sys.argv[2],
+        tools.get_if_ipv4_addr(sys.argv[1]),
+        proto=17)
+udp_dgram = tcp.TCPSegment()
+udp_dgram.src_port = 44444
+if len(sys.argv) < 4:
+    udp_dgram.dst_port = 80
+else:
+    udp_dgram.dst_port = int(sys.argv[3])
+udp_dgram.syn = 1
+udp_dgram.payload = b'\xaa' * 5000
+ip_handler.send(udp_dgram)
